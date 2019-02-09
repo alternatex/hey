@@ -29,13 +29,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/rakyll/hey/requester"
+	"github.com/alternatex/hey2node/requester"
 )
 
 const (
 	headerRegexp = `^([\w-]+):\s*(.+)`
 	authRegexp   = `^(.+):([^\s].+)`
-	heyUA        = "hey/0.0.1"
+	heyUA        = "hey2node/0.0.1"
 )
 
 var (

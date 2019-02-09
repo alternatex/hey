@@ -1,0 +1,28 @@
+{
+  "name": "hey2node",
+  "version": "0.0.1",
+  "description": "hey + go2node",
+  "main": "index.js",
+  "scripts": {
+    "install": "make build",
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alternatex/hey2node.git"
+  },
+  "author": {
+    "name": "Gianni Furger",
+    "email": "gianni.furger@gmail.com"
+  },
+  "bugs": {
+    "url": "https://github.com/alternatex/hey2node/issues"
+  },
+  "homepage": "https://github.com/alternatex/hey2node#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "cli-progress": "^2.1.1",
+    "mocha": "^5.2.0",
+    "should": "^13.2.3"
+  }
+}

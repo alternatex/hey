@@ -85,27 +85,27 @@ func runReporter(r *report) {
 	// Loop will continue until channel is closed
 	for res := range r.results {
 		r.numRes++
-		if res.err != nil {
-			r.errorDist[res.err.Error()]++
+		if res.Err != nil {
+			r.errorDist[res.Err.Error()]++
 		} else {
-			r.avgTotal += res.duration.Seconds()
-			r.avgConn += res.connDuration.Seconds()
-			r.avgDelay += res.delayDuration.Seconds()
-			r.avgDNS += res.dnsDuration.Seconds()
-			r.avgReq += res.reqDuration.Seconds()
-			r.avgRes += res.resDuration.Seconds()
+			r.avgTotal += res.Duration.Seconds()
+			r.avgConn += res.ConnDuration.Seconds()
+			r.avgDelay += res.DelayDuration.Seconds()
+			r.avgDNS += res.DnsDuration.Seconds()
+			r.avgReq += res.ReqDuration.Seconds()
+			r.avgRes += res.ResDuration.Seconds()
 			if len(r.resLats) < maxRes {
-				r.lats = append(r.lats, res.duration.Seconds())
-				r.connLats = append(r.connLats, res.connDuration.Seconds())
-				r.dnsLats = append(r.dnsLats, res.dnsDuration.Seconds())
-				r.reqLats = append(r.reqLats, res.reqDuration.Seconds())
-				r.delayLats = append(r.delayLats, res.delayDuration.Seconds())
-				r.resLats = append(r.resLats, res.resDuration.Seconds())
-				r.statusCodes = append(r.statusCodes, res.statusCode)
-				r.offsets = append(r.offsets, res.offset.Seconds())
+				r.lats = append(r.lats, res.Duration.Seconds())
+				r.connLats = append(r.connLats, res.ConnDuration.Seconds())
+				r.dnsLats = append(r.dnsLats, res.DnsDuration.Seconds())
+				r.reqLats = append(r.reqLats, res.ReqDuration.Seconds())
+				r.delayLats = append(r.delayLats, res.DelayDuration.Seconds())
+				r.resLats = append(r.resLats, res.ResDuration.Seconds())
+				r.statusCodes = append(r.statusCodes, res.StatusCode)
+				r.offsets = append(r.offsets, res.Offset.Seconds())
 			}
-			if res.contentLength > 0 {
-				r.sizeTotal += res.contentLength
+			if res.ContentLength > 0 {
+				r.sizeTotal += res.ContentLength
 			}
 		}
 	}
@@ -206,8 +206,8 @@ func (r *report) snapshot() Report {
 	snapshot.ResMin = r.resLats[len(r.resLats)-1]
 
 	statusCodeDist := make(map[int]int, len(snapshot.StatusCodes))
-	for _, statusCode := range snapshot.StatusCodes {
-		statusCodeDist[statusCode]++
+	for _, StatusCode := range snapshot.StatusCodes {
+		statusCodeDist[StatusCode]++
 	}
 	snapshot.StatusCodeDist = statusCodeDist
 

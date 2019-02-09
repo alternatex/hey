@@ -18,6 +18,7 @@ package requester
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -28,6 +29,7 @@ import (
 	"time"
 
 	"golang.org/x/net/http2"
+	"github.com/zealic/go2node"
 )
 
 // Max size of the buffer of result channel.
@@ -35,17 +37,18 @@ const maxResult = 1000000
 const maxIdleConn = 500
 
 type result struct {
-	err           error
-	statusCode    int
-	offset        time.Duration
-	duration      time.Duration
-	connDuration  time.Duration // connection setup(DNS lookup + Dial up) duration
-	dnsDuration   time.Duration // dns lookup duration
-	reqDuration   time.Duration // request "write" duration
-	resDuration   time.Duration // response "read" duration
-	delayDuration time.Duration // delay between response and request
-	contentLength int64
+	Err           error
+	StatusCode    int
+	Offset        time.Duration
+	Duration      time.Duration
+	ConnDuration  time.Duration // connection setup(DNS lookup + Dial up) duration
+	DnsDuration   time.Duration // dns lookup duration
+	ReqDuration   time.Duration // request "write" duration
+	ResDuration   time.Duration // response "read" duration
+	DelayDuration time.Duration // delay between response and request
+	ContentLength int64
 }
+
 
 type Work struct {
 	// Request is the request to be made.
@@ -93,6 +96,9 @@ type Work struct {
 	stopCh   chan struct{}
 	start    time.Duration
 
+	// Node IPC
+	channel go2node.NodeChannel
+
 	report *report
 }
 
@@ -114,6 +120,11 @@ func (b *Work) Init() {
 // Run makes all the requests, prints the summary. It blocks until
 // all work is done.
 func (b *Work) Run() {
+	channel, err := go2node.RunAsNodeChild()
+	if err != nil {
+		channel = nil
+	}
+	b.channel = channel
 	b.Init()
 	b.start = now()
 	b.report = newReport(b.writer(), b.results, b.Output, b.N)
@@ -172,8 +183,10 @@ func (b *Work) makeRequest(c *http.Client) {
 			resStart = now()
 		},
 	}
+
 	req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	resp, err := c.Do(req)
+
 	if err == nil {
 		size = resp.ContentLength
 		code = resp.StatusCode
@@ -183,17 +196,33 @@ func (b *Work) makeRequest(c *http.Client) {
 	t := now()
 	resDuration = t - resStart
 	finish := t - s
-	b.results <- &result{
-		offset:        s,
-		statusCode:    code,
-		duration:      finish,
-		err:           err,
-		contentLength: size,
-		connDuration:  connDuration,
-		dnsDuration:   dnsDuration,
-		reqDuration:   reqDuration,
-		resDuration:   resDuration,
-		delayDuration: delayDuration,
+
+	result := &result{
+		Offset:        s,
+		StatusCode:    code,
+		Duration:      finish,
+		Err:           err,
+		ContentLength: size,
+		ConnDuration:  connDuration,
+		DnsDuration:   dnsDuration,
+		ReqDuration:   reqDuration,
+		ResDuration:   resDuration,
+		DelayDuration: delayDuration,
+	}
+
+	b.results <- result
+
+	if b.channel != nil {
+		resultJson, err := json.Marshal(result)
+		if err != nil {
+			panic(err)
+		}
+		err = b.channel.Write(&go2node.NodeMessage{
+			Message: []byte(resultJson),
+		})
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
