@@ -1,6 +1,6 @@
 {
   "name": "hey2node",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "hey + go2node",
   "main": "index.js",
   "scripts": {
@@ -13,7 +13,8 @@
   },
   "author": {
     "name": "Gianni Furger",
-    "email": "gianni.furger@gmail.com"
+    "email": "gianni.furger@gmail.com",
+    "url": "http://github.com/alternatex/"
   },
   "bugs": {
     "url": "https://github.com/alternatex/hey2node/issues"
